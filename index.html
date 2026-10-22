@@ -87,14 +87,17 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 <div class="full"><label>Judul buku</label><input id="aT"></div>
 <div><label>Penulis</label><input id="aA"></div>
 <div><label>Jenis buku</label><select id="aTy"></select></div>
-<div><label>Kategori (mis. Matematika, Fiksi, Sains)</label><input id="aC" list="catlist"><datalist id="catlist"></datalist></div>
+<div><label>Kategori (tambah kategori baru di bagian bawah)</label><select id="aC"></select></div>
 <div><label>Format</label><select id="aF"><option value="flip">Baca Online (flipbook, unggah gambar halaman)</option><option value="pdf">PDF (bisa diunduh)</option></select></div>
 <div class="full"><label>Deskripsi singkat</label><textarea id="aD" rows="2"></textarea></div>
 <div class="full"><label id="aFl">File</label><input type="file" id="aFile" multiple></div>
+<div class="full"><label>Gambar sampul (opsional; flipbook otomatis memakai halaman pertama)</label><input type="file" id="aCov" accept="image/*"></div>
 <div><label><input type="checkbox" id="aR" style="width:auto"> Tampilkan di Referensi Pilihan</label></div>
 <div style="text-align:right"><button class="btn" id="aSave">Simpan Buku</button></div>
 <div class="full" id="aMsg" style="color:var(--mut);font-size:14px"></div>
 </div>
+<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+<label>Kelola kategori</label><div style="display:flex;gap:8px"><input id="catN" placeholder="Nama kategori baru, mis. Sejarah"><button class="btn" id="catAdd">Tambah</button></div><div class="chips" id="catMgr"></div>
 <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
 <label>Latar beranda versi web/komputer</label><input type="file" id="bgFile" accept="image/*">
 <label style="margin-top:8px">Latar beranda versi HP</label><input type="file" id="bgmFile" accept="image/*">
@@ -125,7 +128,7 @@ const g=i=>document.getElementById(i);
 g('lgX').onclick=()=>g('login').classList.remove('on');
 const why=(!C.url||/ISI_/.test(C.url)||!C.key||/ISI_/.test(C.key))?'config.js belum terbaca atau belum diisi. Buka alamat-situs/config.js di tab baru untuk memeriksanya.':!window.supabase?'Pustaka Supabase gagal dimuat (internet putus atau jaringan memblokirnya).':'';
 if(why){g('lgGo').onclick=()=>{g('lgM').textContent=why};return}
-const sb=supabase.createClient(C.url,C.key),L={};let sess=null;
+const sb=supabase.createClient(C.url,C.key),L={},DL={};let sess=null;
 const ready=sb.auth.getSession().then(({data})=>{sess=data.session});
 const snap=rows=>({docs:rows.map(r=>({id:r.path.split('/').pop(),exists:true,data:()=>r.data}))});
 async function refresh(c){try{const {data,error}=await sb.from('docs').select('path,data').like('path',c+'/%');if(error)throw error;(L[c]||[]).forEach(f=>f(snap(data)))}catch(e){}}
@@ -133,9 +136,9 @@ setInterval(()=>Object.keys(L).forEach(refresh),30000);
 const coll=c=>({onSnapshot(cb){(L[c]=L[c]||[]).push(cb);refresh(c);return()=>{}}});
 const doc=p=>({
  async get(){const {data}=await sb.from('docs').select('data').eq('path',p).maybeSingle();return {exists:!!data,id:p.split('/').pop(),data:()=>data&&data.data}},
- async set(d){const row={path:p,data:d},{error}=await (p.startsWith('guests/')?sb.from('docs').insert(row):sb.from('docs').upsert(row));if(error)throw error;refresh(p.split('/')[0])},
+ async set(d){const row={path:p,data:d},{error}=await (p.startsWith('guests/')?sb.from('docs').insert(row):sb.from('docs').upsert(row));if(error)throw error;refresh(p.split('/')[0]);(DL[p]||[]).forEach(f=>f())},
  async delete(){const {error}=await sb.from('docs').delete().eq('path',p);if(error)throw error;refresh(p.split('/')[0])},
- onSnapshot(cb){const f=async()=>cb(await doc(p).get());f();setInterval(f,30000);return()=>{}}});
+ onSnapshot(cb){const f=async()=>cb(await doc(p).get());(DL[p]=DL[p]||[]).push(f);f();setInterval(f,30000);return()=>{}}});
 window.claude={use:async n=>{await ready;
  if(n=='db')return {collection:coll,doc};
  if(n=='user')return {canEdit:()=>!!sess,isOwner:()=>!!sess};
@@ -154,20 +157,21 @@ const SAMPLE=[
 {id:'s2',title:'Kamus Bahasa Indonesia (contoh)',author:'Tim Contoh',type:'Kamus',cat:'Bahasa',fmt:'pdf',hue:30,rec:1,desc:'Contoh buku PDF.'},
 {id:'s3',title:'Matematika Kelas VII (contoh)',author:'Tim Contoh',type:'Buku Ajar',cat:'Matematika',fmt:'flip',hue:260,desc:'Contoh buku ajar.',pages:[1,2,3,4].map(lorem)},
 {id:'s4',title:'IPA Terpadu (contoh)',author:'Tim Contoh',type:'Buku Ajar',cat:'Sains',fmt:'pdf',hue:150,desc:'Contoh buku ajar PDF.'}];
-let books=[],db=null,user=null,admin=false,visits={},filt={cat:''},pop={},guests=[];
+let books=[],db=null,user=null,admin=false,visits={},filt={cat:''},pop={},guests=[],CATS=[];
 const ymd=o=>{const d=new Date(Date.now()-o*864e5);return d.toISOString().slice(0,10)};
 const src=id=>window.CFG.url+'/storage/v1/object/public/buku/'+id,esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const all=()=>books.length?books:SAMPLE;
 
-function card(b){const h=b.hue??(b.title.length*37)%360;
-return `<div class="book"><div class="cover" style="background:linear-gradient(160deg,hsl(${h} 60% 38%),hsl(${(h+40)%360} 55% 22%))"><span class="badge">${b.fmt=='pdf'?'PDF':'FLIPBOOK'}</span><small>${esc(b.type)}</small><span class="em">${EM[b.type]||'📘'}</span><span style="font-size:15px;line-height:1.2">${esc(b.title)}</span></div>
-<div class="binfo"><b>${esc(b.title)}</b><span>${esc(b.author||'')} · ${esc(b.cat||'')}</span><div class="acts">${b.fmt=='pdf'?`<button class="btn sm" data-dl="${b.id}">⬇ Unduh</button>`:`<button class="btn sm" data-rd="${b.id}">📖 Baca</button>`}${admin&&b.id[0]!='s'?`<button class="btn red sm" data-del="${b.id}">Hapus</button>`:''}</div></div></div>`}
+function card(b){const h=b.hue??(b.title.length*37)%360,im=b.cover||(typeof (b.pages||[])[0]=='string'?b.pages[0]:'');
+return `<div class="book"><div class="cover" style="background:${im?`url(${src(im)}) center/cover #ddd`:`linear-gradient(160deg,hsl(${h} 60% 38%),hsl(${(h+40)%360} 55% 22%))`}"><span class="badge">${b.fmt=='pdf'?'PDF':'FLIPBOOK'}</span>${im?'':`<small>${esc(b.type)}</small><span class="em">${EM[b.type]||'📘'}</span><span style="font-size:15px;line-height:1.2">${esc(b.title)}</span>`}</div>
+<div class="binfo"><b>${esc(b.title)}</b><span>${esc(b.author||'')} · ${esc(b.cat||'')}</span><div class="acts">${b.fmt=='pdf'?`<button class="btn sm" data-dl="${b.id}">⬇ Unduh</button>`:`<button class="btn sm" data-rd="${b.id}">📖 Baca</button>`}${admin&&b.id[0]!='s'?`<button class="btn alt sm" data-cv="${b.id}">Sampul</button><button class="btn red sm" data-del="${b.id}">Hapus</button>`:''}</div></div></div>`}
 
 function render(){
 const q=$('#q').value.toLowerCase(),ty=$('#type').value,fm=$('#fmt').value,A=all();
-const cats=[...new Set(A.map(b=>b.cat).filter(Boolean))].sort();
+const cats=[...new Set([...A.map(b=>b.cat),...CATS].filter(Boolean))].sort();
 $('#cats').innerHTML=['',...cats].map(c=>`<button class="chip ${filt.cat==c?'on':''}" data-cat="${esc(c)}">${c||'Semua kategori'}</button>`).join('');
-$('#catlist').innerHTML=cats.map(c=>`<option value="${esc(c)}">`).join('');
+const sv=$('#aC').value;$('#aC').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('')||'<option value="">(buat kategori dulu)</option>';if(cats.includes(sv))$('#aC').value=sv;
+$('#catMgr').innerHTML=CATS.map(c=>`<span class="chip">${esc(c)} <a href="#" data-cd="${esc(c)}" style="color:#b3372f;text-decoration:none">✕</a></span>`).join('');
 const L=A.filter(b=>(!q||(b.title+' '+(b.author||'')).toLowerCase().includes(q))&&(!ty||b.type==ty)&&(!fm||b.fmt==fm)&&(!filt.cat||b.cat==filt.cat));
 $('#list').innerHTML=L.length?L.map(card).join(''):'<div class="msg" style="grid-column:1/-1">Buku tidak ditemukan. Coba kata kunci lain.</div>';
 const R=A.filter(b=>b.rec);$('#recWrap').style.display=R.length?'':'none';$('#recs').innerHTML=R.map(card).join('');
@@ -198,7 +202,7 @@ if('cat'in D){filt.cat=D.cat;render()}
 else if(D.rd){openRd(all().find(b=>b.id==D.rd))}
 else if(D.dl){const b=all().find(x=>x.id==D.dl);if(!b.file){alert('Ini hanya contoh. Unggah PDF asli lewat Panel Admin.');return}
 track(b.id);try{const dls=await claude.use('downloads');const bl=await (await fetch(src(b.file))).blob();await dls.save({filename:b.title+'.pdf',data:bl})}catch(x){alert('Unduhan dibatalkan atau belum tersedia.')}}
-else if(D.del){if(!confirm('Hapus buku ini dari koleksi?'))return;const b=books.find(x=>x.id==D.del);try{await db.doc('books/'+b.id).delete();const a=await claude.use('assets');for(const id of [b.file,...(b.pages||[])]){if(typeof id=='string')a&&a.delete(id).catch(()=>{})}}catch(x){alert('Gagal menghapus.')}}});
+else if(D.del){if(!confirm('Hapus buku ini dari koleksi?'))return;const b=books.find(x=>x.id==D.del);try{await db.doc('books/'+b.id).delete();const a=await claude.use('assets');for(const id of [b.file,b.cover,...(b.pages||[])]){if(typeof id=='string')a&&a.delete(id).catch(()=>{})}}catch(x){alert('Gagal menghapus.')}}});
 ['#q','#type','#fmt'].forEach(s=>$(s).addEventListener('input',render));
 $('#admBtn').onclick=()=>admin?$('#admin').scrollIntoView():$('#login').classList.add('on');
 $('#aF').onchange=()=>{$('#aFl').textContent=$('#aF').value=='pdf'?'File PDF (satu file)':'Gambar halaman (pilih banyak, urut nama file)'};
@@ -207,16 +211,19 @@ if(!t||!files.length){m.textContent='Judul dan file wajib diisi.';return}
 try{m.textContent='Mengunggah…';const a=await claude.use('assets'),ids=[];files.sort((x,y)=>x.name.localeCompare(y.name,undefined,{numeric:true}));
 for(const [i,fl] of (f=='pdf'?[files[0]]:files).entries()){m.textContent=`Mengunggah ${i+1}/${files.length}…`;ids.push((await a.upload(fl)).id)}
 const id='b'+Date.now(),d={title:t,author:$('#aA').value,type:$('#aTy').value,cat:$('#aC').value.trim(),fmt:f,desc:$('#aD').value,rec:$('#aR').checked?1:0,ts:Date.now()};
-if(f=='pdf')d.file=ids[0];else d.pages=ids;
-await db.doc('books/'+id).set(d);m.textContent='✅ Buku tersimpan.';['aT','aA','aC','aD','aFile'].forEach(i=>$('#'+i).value='')}catch(x){m.textContent='Gagal menyimpan: '+(x.message||x.code)}};
-$('#bgSave').onclick=async()=>{const f=$('#bgFile').files[0],g=$('#bgmFile').files[0];if(!f&&!g)return;try{const a=await claude.use('assets'),c={...BG};if(f)c.bg=(await a.upload(f)).id;if(g)c.bgm=(await a.upload(g)).id;await db.doc('config/site').set(c);alert('Latar dipasang.')}catch(x){alert('Gagal: '+(x.message||x.code))}};
-let BG={};function setBg(c){BG=c||{};const id=(innerWidth<=700&&BG.bgm)||BG.bg;if(id)$('#hero').style.backgroundImage=`linear-gradient(#0a3f4dcc,#0a3f4d99),url(${src(id)})`}
+const cv=$('#aCov').files[0];if(cv)d.cover=(await a.upload(cv)).id;if(f=='pdf')d.file=ids[0];else d.pages=ids;
+await db.doc('books/'+id).set(d);m.textContent='✅ Buku tersimpan.';['aT','aA','aD','aFile','aCov'].forEach(i=>$('#'+i).value='')}catch(x){m.textContent='Gagal menyimpan: '+(x.message||x.code)}};
+$('#bgSave').onclick=async()=>{const f=$('#bgFile').files[0],g=$('#bgmFile').files[0];if(!f&&!g)return;try{const a=await claude.use('assets'),c={...BG};if(f)c.bg=(await a.upload(f)).id;if(g)c.bgm=(await a.upload(g)).id;await db.doc('config/site').set(c);setBg(c);alert('Latar dipasang.')}catch(x){alert('Gagal: '+(x.message||x.code))}};
+let BG={};function setBg(c){BG=c||{};const id=(innerWidth<=700&&BG.bgm)||BG.bg;if(id)$('#hero').style.backgroundImage=`linear-gradient(90deg,#0a3f4daa,#0a3f4d00 75%),url(${src(id)})`}
 addEventListener('resize',()=>setBg(BG));
 async function track(id){try{let H=JSON.parse(localStorage.getItem('hist')||'[]');H=[id,...H.filter(x=>x!=id)].slice(0,12);localStorage.setItem('hist',JSON.stringify(H))}catch(e){}
 try{if(id[0]!='s'&&db){const r=db.doc('pop/'+id),s=await r.get();await r.set({n:(s.exists?s.data().n||0:0)+1})}}catch(e){}render()}
 $('#gS').onclick=async()=>{const n=$('#gN').value.trim(),m=$('#gM');if(!n){m.textContent='Nama wajib diisi.';return}if(!db){m.textContent='Buku tamu belum tersedia.';return}try{await db.doc('guests/g'+Date.now()).set({n,k:$('#gK').value,p:$('#gP').value,ts:Date.now()});m.textContent='Terima kasih sudah berkunjung! 🙏';['gN','gK','gP'].forEach(i=>$('#'+i).value='')}catch(e){m.textContent='Gagal mengirim.'}};
 function gl(){$('#gList').innerHTML=guests.length?guests.map(g=>`<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:14px"><b>${esc(g.n)}</b> · ${esc(g.k)} · ${new Date(g.ts).toLocaleDateString('id-ID')}<br>${esc(g.p)} <button class="btn red sm" onclick="db.doc('guests/${g.id}').delete()">Hapus</button></div>`).join(''):'<div class="msg">Belum ada tamu.</div>'}
 
+$('#catAdd').onclick=async()=>{const n=$('#catN').value.trim();if(!n||CATS.includes(n))return;const l=[...CATS,n];try{await db.doc('config/cats').set({list:l});CATS=l;$('#catN').value='';render()}catch(x){alert('Gagal: '+(x.message||x.code))}};
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-cd]');if(!t)return;e.preventDefault();const l=CATS.filter(c=>c!=t.dataset.cd);try{await db.doc('config/cats').set({list:l});CATS=l;render()}catch(x){alert('Gagal: '+(x.message||x.code))}});
+document.addEventListener('click',e=>{const t=e.target.closest('[data-cv]');if(!t)return;const b=books.find(x=>x.id==t.dataset.cv),i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{try{const a=await claude.use('assets'),r=await a.upload(i.files[0]),{id,...d}=b;await db.doc('books/'+id).set({...d,cover:r.id})}catch(x){alert('Gagal: '+(x.message||x.code))}};i.click()});
 // Init
 $('#type').innerHTML+=TYPES.map(t=>`<option>${t}</option>`).join('');$('#aTy').innerHTML=TYPES.map(t=>`<option>${t}</option>`).join('');
 render();
@@ -224,6 +231,7 @@ render();
 if(db){db.collection('books').onSnapshot(s=>{books=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.ts||0)-(a.ts||0));render()},()=>{});
 db.collection('visits').onSnapshot(s=>{visits={};s.docs.forEach(d=>visits[d.id]=d.data().count||0);chart()},()=>{});
 db.doc('config/site').onSnapshot(s=>{if(s.exists)setBg(s.data())},()=>{});
+db.doc('config/cats').onSnapshot(s=>{CATS=s.exists?(s.data().list||[]):[];render()},()=>{});
 db.collection('pop').onSnapshot(s=>{pop={};s.docs.forEach(d=>pop[d.id]=d.data().n||0);render()},()=>{});
 if(admin)db.collection('guests').onSnapshot(s=>{guests=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.ts-a.ts);gl()},()=>{});
 let seen=0;try{seen=sessionStorage.getItem('v')}catch(e){}
