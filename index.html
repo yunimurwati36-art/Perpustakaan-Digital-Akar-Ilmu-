@@ -42,7 +42,7 @@ h2{font-size:24px;margin:26px 0 12px}
 .badge{position:absolute;top:10px;right:10px;background:#0006;border-radius:8px;padding:2px 8px;font:800 11px Nunito}
 .binfo{padding:10px 12px;font-size:14px;display:flex;flex-direction:column;gap:2px;flex:1}
 .binfo b{font-size:15px}.binfo span{color:var(--mut)}
-.acts{display:flex;gap:6px;margin-top:auto;padding-top:8px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:8px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:20px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .stat{background:var(--bg);border-radius:12px;padding:10px 14px}.stat b{font:700 26px Fraunces,serif;color:var(--pri);display:block}
@@ -120,6 +120,7 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 <div class="ctl"><button class="btn" id="rP">◀</button><span id="rN"></span><button class="btn" id="rNx">▶</button></div></div>
 
 <script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\/script>')</script>
 <script>
@@ -166,7 +167,7 @@ const all=()=>books.length?books:SAMPLE;
 
 function card(b){const h=b.hue??(b.title.length*37)%360,im=b.cover||(typeof (b.pages||[])[0]=='string'?b.pages[0]:'');
 return `<div class="book"><div class="cover" style="background:${im?`url(${src(im)}) center/cover #ddd`:`linear-gradient(160deg,hsl(${h} 60% 38%),hsl(${(h+40)%360} 55% 22%))`}"><span class="badge">${b.fmt=='pdf'?'PDF':'FLIPBOOK'}</span>${im?'':`<small>${esc(b.type)}</small><span class="em">${EM[b.type]||'📘'}</span><span style="font-size:15px;line-height:1.2">${esc(b.title)}</span>`}</div>
-<div class="binfo"><b>${esc(b.title)}</b><span>${esc(b.author||'')} · ${esc(b.cat||'')}</span><div class="acts">${b.fmt=='pdf'?`<button class="btn sm" data-dl="${b.id}">⬇ Unduh</button>`:`<button class="btn sm" data-rd="${b.id}">📖 Baca</button>`}${admin&&b.id[0]!='s'?`<button class="btn alt sm" data-cv="${b.id}">Sampul</button><button class="btn red sm" data-del="${b.id}">Hapus</button>`:''}</div></div></div>`}
+<div class="binfo"><b>${esc(b.title)}</b><span>${esc(b.author||'')} · ${esc(b.cat||'')}</span><div class="acts"><button class="btn sm" data-rd="${b.id}">📖 Baca</button>${b.fmt=='pdf'?`<button class="btn alt sm" data-dl="${b.id}">⬇ Unduh</button>`:''}${admin&&b.id[0]!='s'?`<button class="btn alt sm" data-cv="${b.id}">Sampul</button>${b.fmt=='pdf'&&!b.cover?`<button class="btn alt sm" data-ac="${b.id}">Sampul otomatis</button>`:''}<button class="btn red sm" data-del="${b.id}">Hapus</button>`:''}</div></div></div>`}
 
 function render(){
 const q=$('#q').value.toLowerCase(),ty=$('#type').value,fm=$('#fmt').value,A=all();
@@ -189,12 +190,21 @@ $('#sTot').textContent=Object.values(visits).reduce((a,b)=>a+b,0);$('#sToday').t
 
 // Reader
 let cur=null,pi=0;
-function openRd(b){track(b.id);cur=b;pi=0;$('#rT').textContent=b.title;$('#reader').classList.add('on');spread()}
-function pgHtml(p,n){return `<div class="pg">${p?(typeof p=='string'?`<img src="${src(p)}" alt="Halaman ${n}">`:`<p>${esc(p.t)}</p>`):''}${p?`<i>${n}</i>`:''}</div>`}
-function spread(dir){const P=cur.pages||[];const el=$('#spread');el.innerHTML=pgHtml(P[pi],pi+1)+pgHtml(P[pi+1],pi+2);
+if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+async function openRd(b){if(b.fmt=='pdf'&&!b.file){alert('Ini hanya buku contoh. Unggah PDF asli lewat Panel Admin.');return}
+track(b.id);const c=cur=Object.assign({},b,{cache:{}});pi=0;$('#rT').textContent=b.title;$('#reader').classList.add('on');
+if(b.fmt=='pdf'){if(!window.pdfjsLib){$('#reader').classList.remove('on');alert('Pembaca PDF gagal dimuat. Muat ulang halaman, atau periksa jaringan.');return}
+$('#spread').innerHTML='<div class="pg">Memuat PDF…</div>';$('#rN').textContent='';
+try{const d=await pdfjsLib.getDocument(src(b.file)).promise;if(cur!==c)return;c.pdf=d;c.pages=Array.from({length:d.numPages},()=>({pdf:1}))}catch(e){$('#spread').innerHTML='<div class="pg">Gagal membuka PDF.</div>';return}}
+spread()}
+async function rp(el){const n=+el.dataset.pp,c=cur;if(!el.clientWidth)return;let u=c.cache[n];if(!u){const pg=await c.pdf.getPage(n),v0=pg.getViewport({scale:1}),sc=Math.min((el.clientWidth-30)/v0.width,(el.clientHeight-40)/v0.height)*Math.min(2,Math.max(1.2,devicePixelRatio)),vp=pg.getViewport({scale:sc}),cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;u=c.cache[n]=cv.toDataURL('image/jpeg',.85)}
+if(cur===c&&el.isConnected&&!el.querySelector('img'))el.insertAdjacentHTML('afterbegin',`<img src="${u}" alt="Halaman ${n}">`)}
+async function pdfCover(url){const d=await pdfjsLib.getDocument(url).promise,pg=await d.getPage(1),v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:480/v0.width}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;return await new Promise(r=>c.toBlob(r,'image/jpeg',.82))}
+function pgHtml(p,n){return `<div class="pg"${p&&p.pdf?` data-pp="${n}"`:''}>${p?(typeof p=='string'?`<img src="${src(p)}" alt="Halaman ${n}">`:p.pdf?'':`<p>${esc(p.t)}</p>`):''}${p?`<i>${n}</i>`:''}</div>`}
+function spread(dir){const P=cur.pages||[];const el=$('#spread');el.innerHTML=pgHtml(P[pi],pi+1)+pgHtml(P[pi+1],pi+2);el.querySelectorAll('[data-pp]').forEach(x=>rp(x).catch(()=>{}));
 el.className='spread '+(dir>0?'fn':dir<0?'fp':'');void el.offsetWidth;$('#rN').textContent=P.length?`Hal. ${pi+1}–${Math.min(pi+2,P.length)} / ${P.length}`:'Buku belum punya halaman'}
-$('#rNx').onclick=()=>{if(cur&&pi+2<(cur.pages||[]).length){pi+=2;spread(1)}};
-$('#rP').onclick=()=>{if(cur&&pi>0){pi-=2;spread(-1)}};
+$('#rNx').onclick=()=>{const s=innerWidth<=700?1:2;if(cur&&pi+s<(cur.pages||[]).length){pi+=s;spread(1)}};
+$('#rP').onclick=()=>{const s=innerWidth<=700?1:2;if(cur&&pi>0){pi=Math.max(0,pi-s);spread(-1)}};
 $('#rX').onclick=()=>$('#reader').classList.remove('on');
 document.addEventListener('keydown',e=>{if(!$('#reader').classList.contains('on'))return;if(e.key=='ArrowRight')$('#rNx').click();if(e.key=='ArrowLeft')$('#rP').click();if(e.key=='Escape')$('#rX').click()});
 
@@ -213,7 +223,7 @@ if(!t||!files.length){m.textContent='Judul dan file wajib diisi.';return}
 try{m.textContent='Mengunggah…';const a=await claude.use('assets'),ids=[];files.sort((x,y)=>x.name.localeCompare(y.name,undefined,{numeric:true}));
 for(const [i,fl] of (f=='pdf'?[files[0]]:files).entries()){m.textContent=`Mengunggah ${i+1}/${files.length}…`;ids.push((await a.upload(fl)).id)}
 const id='b'+Date.now(),d={title:t,author:$('#aA').value,type:$('#aTy').value,cat:$('#aC').value.trim(),fmt:f,desc:$('#aD').value,rec:$('#aR').checked?1:0,ts:Date.now()};
-const cv=$('#aCov').files[0];if(cv)d.cover=(await a.upload(cv)).id;if(f=='pdf')d.file=ids[0];else d.pages=ids;
+const cv=$('#aCov').files[0];if(cv)d.cover=(await a.upload(cv)).id;else if(f=='pdf'&&window.pdfjsLib){try{m.textContent='Membuat sampul…';d.cover=(await a.upload(new File([await pdfCover(URL.createObjectURL(files[0]))],'cover.jpg',{type:'image/jpeg'}))).id}catch(e){}}if(f=='pdf')d.file=ids[0];else d.pages=ids;
 await db.doc('books/'+id).set(d);m.textContent='✅ Buku tersimpan.';['aT','aA','aD','aFile','aCov'].forEach(i=>$('#'+i).value='')}catch(x){m.textContent='Gagal menyimpan: '+(x.message||x.code)}};
 $('#bgSave').onclick=async()=>{const f=$('#bgFile').files[0],g=$('#bgmFile').files[0];if(!f&&!g)return;try{const a=await claude.use('assets'),c={...BG};if(f)c.bg=(await a.upload(f)).id;if(g)c.bgm=(await a.upload(g)).id;await db.doc('config/site').set(c);setBg(c);alert('Latar dipasang.')}catch(x){alert('Gagal: '+(x.message||x.code))}};
 let BG={};function setBg(c){BG=c||{};const id=(innerWidth<=700&&BG.bgm)||BG.bg;if(id)$('#hero').style.backgroundImage=`linear-gradient(90deg,#0a3f4daa,#0a3f4d00 75%),url(${src(id)})`}
@@ -226,6 +236,7 @@ function gl(){$('#gList').innerHTML=guests.length?guests.map(g=>`<div style="pad
 $('#catAdd').onclick=async()=>{const n=$('#catN').value.trim();if(!n||CATS.includes(n))return;const l=[...CATS,n];try{await db.doc('config/cats').set({list:l});CATS=l;$('#catN').value='';render()}catch(x){alert('Gagal: '+(x.message||x.code))}};
 document.addEventListener('click',async e=>{const t=e.target.closest('[data-cd]');if(!t)return;e.preventDefault();const l=CATS.filter(c=>c!=t.dataset.cd);try{await db.doc('config/cats').set({list:l});CATS=l;render()}catch(x){alert('Gagal: '+(x.message||x.code))}});
 document.addEventListener('click',e=>{const t=e.target.closest('[data-cv]');if(!t)return;const b=books.find(x=>x.id==t.dataset.cv),i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{try{const a=await claude.use('assets'),r=await a.upload(i.files[0]),{id,...d}=b;await db.doc('books/'+id).set({...d,cover:r.id})}catch(x){alert('Gagal: '+(x.message||x.code))}};i.click()});
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-ac]');if(!t)return;const b=books.find(x=>x.id==t.dataset.ac);t.textContent='Memproses…';try{const a=await claude.use('assets'),bl=await pdfCover(src(b.file)),r=await a.upload(new File([bl],'cover.jpg',{type:'image/jpeg'})),{id,...d}=b;await db.doc('books/'+id).set({...d,cover:r.id})}catch(x){alert('Gagal: '+(x.message||x.code));t.textContent='Sampul otomatis'}});
 // Init
 $('#type').innerHTML+=TYPES.map(t=>`<option>${t}</option>`).join('');$('#aTy').innerHTML=TYPES.map(t=>`<option>${t}</option>`).join('');
 render();
