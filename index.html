@@ -116,11 +116,15 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\/script>')</script>
 <script>
 /* Lapisan penghubung ke Supabase. Jika config.js belum diisi, halaman hanya menampilkan buku contoh. */
 (function(){
 const C=window.CFG||{};
-if(!C.url||/ISI_/.test(C.url)||!window.supabase)return;
+const g=i=>document.getElementById(i);
+g('lgX').onclick=()=>g('login').classList.remove('on');
+const why=(!C.url||/ISI_/.test(C.url)||!C.key||/ISI_/.test(C.key))?'config.js belum terbaca atau belum diisi. Buka alamat-situs/config.js di tab baru untuk memeriksanya.':!window.supabase?'Pustaka Supabase gagal dimuat (internet putus atau jaringan memblokirnya).':'';
+if(why){g('lgGo').onclick=()=>{g('lgM').textContent=why};return}
 const sb=supabase.createClient(C.url,C.key),L={};let sess=null;
 const ready=sb.auth.getSession().then(({data})=>{sess=data.session});
 const snap=rows=>({docs:rows.map(r=>({id:r.path.split('/').pop(),exists:true,data:()=>r.data}))});
@@ -138,9 +142,7 @@ window.claude={use:async n=>{await ready;
  if(n=='assets')return sess?{upload:async f=>{const id=Date.now()+'-'+Math.random().toString(36).slice(2,8)+((f.name.match(/\.[a-z0-9]+$/i)||[''])[0]).toLowerCase();const {error}=await sb.storage.from('buku').upload(id,f,{contentType:f.type});if(error)throw error;return {id}},delete:async id=>{await sb.storage.from('buku').remove([id])}}:null;
  if(n=='downloads')return {save:async({filename,data})=>{const a=document.createElement('a');a.href=URL.createObjectURL(data);a.download=filename;document.body.appendChild(a);a.click();a.remove();return {status:'saved'}}};
  return null}};
-const g=i=>document.getElementById(i);
-g('lgGo').onclick=async()=>{g('lgM').textContent='Masuk…';const {error}=await sb.auth.signInWithPassword({email:g('lgE').value.trim(),password:g('lgP').value});if(error){g('lgM').textContent='Email atau kata sandi salah.';return}location.reload()};
-g('lgX').onclick=()=>g('login').classList.remove('on');
+g('lgGo').onclick=async()=>{g('lgM').textContent='Masuk…';try{const {error}=await sb.auth.signInWithPassword({email:g('lgE').value.trim(),password:g('lgP').value});if(error){g('lgM').textContent=/invalid login/i.test(error.message)?'Email atau kata sandi salah.':'Gagal: '+error.message;return}location.reload()}catch(e){g('lgM').textContent='Gagal tersambung ke Supabase: '+(e.message||e)}};
 g('outBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
 })();
 </script>
