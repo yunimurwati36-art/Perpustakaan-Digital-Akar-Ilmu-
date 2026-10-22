@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Perpustakaan Digital SMP Negeri 2 Tukul</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3ec;--card:#fff;--ink:#1d2b2a;--mut:#5d6b69;--pri:#0f6b66;--pri2:#0a4d49;--acc:#e8a33d;--line:#e3ddd0;--hero:linear-gradient(135deg,#0f6b66,#0a3f4d 60%,#1b2a4a);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101817;--card:#18231f;--ink:#eaf1ee;--mut:#9fb2ad;--pri:#3fb5ad;--pri2:#2a8f88;--line:#27363a}}
+:root[data-theme="dark"]{--bg:#101817;--card:#18231f;--ink:#eaf1ee;--mut:#9fb2ad;--pri:#3fb5ad;--pri2:#2a8f88;--line:#27363a}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;line-height:1.5}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+.logo{font-family:Fraunces,serif;font-weight:700;color:var(--pri);font-size:18px;flex:1}
+.btn{border:0;border-radius:10px;padding:9px 16px;font:inherit;font-weight:800;cursor:pointer;background:var(--pri);color:#fff}
+.btn.alt{background:transparent;color:var(--pri);border:1.5px solid var(--pri)}
+.btn.red{background:#b3372f}
+.btn.sm{padding:5px 10px;font-size:13px}
+.hero{background:var(--hero) center/cover;color:#fff;padding:56px 0 70px;position:relative}
+.hero p{max-width:560px;opacity:.92}
+.hero h1{font-size:clamp(28px,5vw,46px);line-height:1.15;margin-bottom:10px}
+.search{margin-top:-34px;position:relative}
+.sbox{background:var(--card);border-radius:16px;box-shadow:0 10px 30px #0002;padding:14px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.chip{padding:6px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;color:var(--ink)}
+.chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+h2{font-size:24px;margin:26px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+.book{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s}
+.book:hover{transform:translateY(-4px)}
+.cover{aspect-ratio:3/4;display:flex;flex-direction:column;justify-content:space-between;padding:14px;color:#fff;font-family:Fraunces,serif;font-weight:700;position:relative}
+.cover small{font-family:Nunito,sans-serif;font-weight:800;opacity:.85;letter-spacing:.05em;text-transform:uppercase}
+.cover .em{font-size:34px}
+.badge{position:absolute;top:10px;right:10px;background:#0006;border-radius:8px;padding:2px 8px;font:800 11px Nunito}
+.binfo{padding:10px 12px;font-size:14px;display:flex;flex-direction:column;gap:2px;flex:1}
+.binfo b{font-size:15px}.binfo span{color:var(--mut)}
+.acts{display:flex;gap:6px;margin-top:auto;padding-top:8px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.stat{background:var(--bg);border-radius:12px;padding:10px 14px}.stat b{font:700 26px Fraunces,serif;color:var(--pri);display:block}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form .full{grid-column:1/-1}
+label{font-size:13px;font-weight:800;color:var(--mut);display:block;margin-bottom:3px}
+.ovl{position:fixed;inset:0;background:#000c;z-index:20;display:none;align-items:center;justify-content:center;padding:16px;flex-direction:column;gap:12px}
+.ovl.on{display:flex}
+.spread{display:flex;width:min(900px,100%);height:min(70vh,560px);background:#fbf7ec;border-radius:6px;box-shadow:0 20px 60px #0008;perspective:1800px;overflow:hidden}
+.pg{flex:1;padding:26px 28px;color:#2b2b2b;font-family:Georgia,serif;overflow:hidden;font-size:15px;position:relative;display:flex;flex-direction:column;justify-content:center}
+.pg+.pg{border-left:1px solid #d9d0bb;background:linear-gradient(90deg,#0002,#0000 8%) #fbf7ec}
+.pg img{max-width:100%;max-height:100%;object-fit:contain;margin:auto}
+.pg i{position:absolute;bottom:8px;left:0;right:0;text-align:center;font:12px Nunito;color:#8a8270}
+.fn{animation:fn .45s ease}.fp{animation:fp .45s ease}
+@keyframes fn{from{transform:rotateY(-70deg);transform-origin:left;opacity:.3}to{transform:none}}
+@keyframes fp{from{transform:rotateY(70deg);transform-origin:right;opacity:.3}to{transform:none}}
+.ctl{display:flex;gap:12px;align-items:center;color:#fff}
+.hid{display:none}
+.msg{color:var(--mut);padding:20px;text-align:center}
+footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
+@media(max-width:700px){.sbox{grid-template-columns:1fr}.form{grid-template-columns:1fr}.pg+.pg{display:none}.stats{grid-template-columns:1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><div class="logo">📚 Perpustakaan SMPN 2 Tukul</div><a href="#koleksi" style="color:var(--ink);text-decoration:none;font-weight:700">Koleksi</a><a href="#statistik" style="color:var(--ink);text-decoration:none;font-weight:700">Statistik</a><button class="btn alt sm" id="admBtn">Login Admin</button></div></nav>
+
+<header class="hero" id="hero"><div class="wrap"><h1>Membaca itu jendela dunia, mulai dari layar kecilmu.</h1><p>Perpustakaan digital SMP Negeri 2 Tukul: baca buku langsung seperti halaman asli atau unduh PDF kapan saja.</p></div></header>
+
+<div class="wrap search"><div class="sbox">
+<input id="q" placeholder="🔍 Cari judul atau penulis…">
+<select id="type"><option value="">Semua jenis buku</option></select>
+<select id="fmt"><option value="">Semua format</option><option value="flip">Baca Online (flipbook)</option><option value="pdf">PDF (unduh)</option></select>
+</div></div>
+
+<main class="wrap" id="koleksi">
+<div class="chips" id="cats"></div>
+<div id="recWrap"><h2>⭐ Referensi Pilihan</h2><div class="grid" id="recs"></div></div>
+<div id="popWrap"><h2>🔥 Terpopuler</h2><div class="grid" id="pops"></div></div>
+<div id="hisWrap"><h2>🕘 Riwayat Bacaan Saya</h2><div class="grid" id="hist"></div></div>
+<h2 id="ct">Semua Koleksi</h2>
+<div class="grid" id="list"></div>
+
+<section id="admin" class="hid"><h2>🛠️ Panel Petugas &amp; Kepala Perpustakaan <button class="btn alt sm" id="outBtn">Keluar</button></h2>
+<div class="panel"><div class="form">
+<div class="full"><label>Judul buku</label><input id="aT"></div>
+<div><label>Penulis</label><input id="aA"></div>
+<div><label>Jenis buku</label><select id="aTy"></select></div>
+<div><label>Kategori (mis. Matematika, Fiksi, Sains)</label><input id="aC" list="catlist"><datalist id="catlist"></datalist></div>
+<div><label>Format</label><select id="aF"><option value="flip">Baca Online (flipbook, unggah gambar halaman)</option><option value="pdf">PDF (bisa diunduh)</option></select></div>
+<div class="full"><label>Deskripsi singkat</label><textarea id="aD" rows="2"></textarea></div>
+<div class="full"><label id="aFl">File</label><input type="file" id="aFile" multiple></div>
+<div><label><input type="checkbox" id="aR" style="width:auto"> Tampilkan di Referensi Pilihan</label></div>
+<div style="text-align:right"><button class="btn" id="aSave">Simpan Buku</button></div>
+<div class="full" id="aMsg" style="color:var(--mut);font-size:14px"></div>
+</div>
+<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+<label>Latar beranda versi web/komputer</label><input type="file" id="bgFile" accept="image/*">
+<label style="margin-top:8px">Latar beranda versi HP</label><input type="file" id="bgmFile" accept="image/*">
+<button class="btn alt" id="bgSave" style="margin-top:8px">Pasang Latar</button>
+<hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><label>Buku Tamu (hanya terlihat admin)</label><div id="gList"></div>
+</div></section>
+
+<section id="tamu"><h2>✍️ Buku Tamu</h2><div class="panel"><div class="form"><div><label>Nama</label><input id="gN"></div><div><label>Kelas / Asal</label><input id="gK"></div><div class="full"><label>Pesan atau kesan (opsional)</label><textarea id="gP" rows="2"></textarea></div><div class="full" style="display:flex;gap:10px;align-items:center"><button class="btn" id="gS">Kirim</button><span id="gM" style="color:var(--mut)"></span></div></div></div></section>
+<section id="statistik"><h2>📈 Pengunjung Perpustakaan</h2>
+<div class="panel"><div class="stats"><div class="stat"><b id="sTot">0</b>Total kunjungan</div><div class="stat"><b id="sToday">0</b>Hari ini</div><div class="stat"><b id="sBooks">0</b>Judul buku</div></div>
+<div style="overflow-x:auto"><svg id="chart" viewBox="0 0 640 220" style="width:100%;min-width:420px"></svg></div></div></section>
+</main>
+<footer>© Perpustakaan Digital SMP Negeri 2 Tukul · “Buku adalah jendela dunia”</footer>
+
+<div class="ovl" id="login"><div class="panel" style="width:min(380px,100%);margin:0"><h3>Login Admin</h3><label>Email</label><input id="lgE" type="email"><label style="margin-top:8px">Kata sandi</label><input id="lgP" type="password"><p id="lgM" style="color:var(--mut);font-size:14px"></p><div style="display:flex;gap:8px"><button class="btn" id="lgGo">Masuk</button><button class="btn alt" id="lgX">Batal</button></div></div></div>
+<div class="ovl" id="reader"><div class="ctl"><b id="rT" style="font-family:Fraunces,serif"></b><button class="btn alt sm" style="color:#fff;border-color:#fff" id="rX">✕ Tutup</button></div>
+<div class="spread" id="spread"></div>
+<div class="ctl"><button class="btn" id="rP">◀</button><span id="rN"></span><button class="btn" id="rNx">▶</button></div></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\/script>')</script>
+<script>
+/* Lapisan penghubung ke Supabase. Jika config.js belum diisi, halaman hanya menampilkan buku contoh. */
+(function(){
+const C=window.CFG||{};
+const g=i=>document.getElementById(i);
+g('lgX').onclick=()=>g('login').classList.remove('on');
+const why=(!C.url||/ISI_/.test(C.url)||!C.key||/ISI_/.test(C.key))?'config.js belum terbaca atau belum diisi. Buka alamat-situs/config.js di tab baru untuk memeriksanya.':!window.supabase?'Pustaka Supabase gagal dimuat (internet putus atau jaringan memblokirnya).':'';
+if(why){g('lgGo').onclick=()=>{g('lgM').textContent=why};return}
+const sb=supabase.createClient(C.url,C.key),L={};let sess=null;
+const ready=sb.auth.getSession().then(({data})=>{sess=data.session});
+const snap=rows=>({docs:rows.map(r=>({id:r.path.split('/').pop(),exists:true,data:()=>r.data}))});
+async function refresh(c){try{const {data,error}=await sb.from('docs').select('path,data').like('path',c+'/%');if(error)throw error;(L[c]||[]).forEach(f=>f(snap(data)))}catch(e){}}
+setInterval(()=>Object.keys(L).forEach(refresh),30000);
+const coll=c=>({onSnapshot(cb){(L[c]=L[c]||[]).push(cb);refresh(c);return()=>{}}});
+const doc=p=>({
+ async get(){const {data}=await sb.from('docs').select('data').eq('path',p).maybeSingle();return {exists:!!data,id:p.split('/').pop(),data:()=>data&&data.data}},
+ async set(d){const row={path:p,data:d},{error}=await (p.startsWith('guests/')?sb.from('docs').insert(row):sb.from('docs').upsert(row));if(error)throw error;refresh(p.split('/')[0])},
+ async delete(){const {error}=await sb.from('docs').delete().eq('path',p);if(error)throw error;refresh(p.split('/')[0])},
+ onSnapshot(cb){const f=async()=>cb(await doc(p).get());f();setInterval(f,30000);return()=>{}}});
+window.claude={use:async n=>{await ready;
+ if(n=='db')return {collection:coll,doc};
+ if(n=='user')return {canEdit:()=>!!sess,isOwner:()=>!!sess};
+ if(n=='assets')return sess?{upload:async f=>{const id=Date.now()+'-'+Math.random().toString(36).slice(2,8)+((f.name.match(/\.[a-z0-9]+$/i)||[''])[0]).toLowerCase();const {error}=await sb.storage.from('buku').upload(id,f,{contentType:f.type});if(error)throw error;return {id}},delete:async id=>{await sb.storage.from('buku').remove([id])}}:null;
+ if(n=='downloads')return {save:async({filename,data})=>{const a=document.createElement('a');a.href=URL.createObjectURL(data);a.download=filename;document.body.appendChild(a);a.click();a.remove();return {status:'saved'}}};
+ return null}};
+g('lgGo').onclick=async()=>{g('lgM').textContent='Masuk…';try{const {error}=await sb.auth.signInWithPassword({email:g('lgE').value.trim(),password:g('lgP').value});if(error){g('lgM').textContent=/invalid login/i.test(error.message)?'Email atau kata sandi salah.':'Gagal: '+error.message;return}location.reload()}catch(e){g('lgM').textContent='Gagal tersambung ke Supabase: '+(e.message||e)}};
+g('outBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+})();
+</script>
+<script>
+const $=s=>document.querySelector(s),TYPES=['Novel','Kamus','Buku Ajar','Referensi','Ensiklopedia','Lainnya'],EM={Novel:'📖',Kamus:'🔤','Buku Ajar':'🎓',Referensi:'🗂️',Ensiklopedia:'🌍',Lainnya:'📘'};
+const lorem=n=>({t:'Halaman '+n+'. Membaca membuka wawasan dan melatih imajinasi. Luangkan waktu setiap hari untuk membaca walau hanya sepuluh menit, dan rasakan perubahannya.'});
+const SAMPLE=[
+{id:'s1',title:'Laskar Pelangi (contoh)',author:'Penulis Contoh',type:'Novel',cat:'Fiksi',fmt:'flip',hue:200,rec:1,desc:'Contoh buku flipbook.',pages:[1,2,3,4,5,6].map(lorem)},
+{id:'s2',title:'Kamus Bahasa Indonesia (contoh)',author:'Tim Contoh',type:'Kamus',cat:'Bahasa',fmt:'pdf',hue:30,rec:1,desc:'Contoh buku PDF.'},
+{id:'s3',title:'Matematika Kelas VII (contoh)',author:'Tim Contoh',type:'Buku Ajar',cat:'Matematika',fmt:'flip',hue:260,desc:'Contoh buku ajar.',pages:[1,2,3,4].map(lorem)},
+{id:'s4',title:'IPA Terpadu (contoh)',author:'Tim Contoh',type:'Buku Ajar',cat:'Sains',fmt:'pdf',hue:150,desc:'Contoh buku ajar PDF.'}];
+let books=[],db=null,user=null,admin=false,visits={},filt={cat:''},pop={},guests=[];
+const ymd=o=>{const d=new Date(Date.now()-o*864e5);return d.toISOString().slice(0,10)};
+const src=id=>window.CFG.url+'/storage/v1/object/public/buku/'+id,esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const all=()=>books.length?books:SAMPLE;
+
+function card(b){const h=b.hue??(b.title.length*37)%360;
+return `<div class="book"><div class="cover" style="background:linear-gradient(160deg,hsl(${h} 60% 38%),hsl(${(h+40)%360} 55% 22%))"><span class="badge">${b.fmt=='pdf'?'PDF':'FLIPBOOK'}</span><small>${esc(b.type)}</small><span class="em">${EM[b.type]||'📘'}</span><span style="font-size:15px;line-height:1.2">${esc(b.title)}</span></div>
+<div class="binfo"><b>${esc(b.title)}</b><span>${esc(b.author||'')} · ${esc(b.cat||'')}</span><div class="acts">${b.fmt=='pdf'?`<button class="btn sm" data-dl="${b.id}">⬇ Unduh</button>`:`<button class="btn sm" data-rd="${b.id}">📖 Baca</button>`}${admin&&b.id[0]!='s'?`<button class="btn red sm" data-del="${b.id}">Hapus</button>`:''}</div></div></div>`}
+
+function render(){
+const q=$('#q').value.toLowerCase(),ty=$('#type').value,fm=$('#fmt').value,A=all();
+const cats=[...new Set(A.map(b=>b.cat).filter(Boolean))].sort();
+$('#cats').innerHTML=['',...cats].map(c=>`<button class="chip ${filt.cat==c?'on':''}" data-cat="${esc(c)}">${c||'Semua kategori'}</button>`).join('');
+$('#catlist').innerHTML=cats.map(c=>`<option value="${esc(c)}">`).join('');
+const L=A.filter(b=>(!q||(b.title+' '+(b.author||'')).toLowerCase().includes(q))&&(!ty||b.type==ty)&&(!fm||b.fmt==fm)&&(!filt.cat||b.cat==filt.cat));
+$('#list').innerHTML=L.length?L.map(card).join(''):'<div class="msg" style="grid-column:1/-1">Buku tidak ditemukan. Coba kata kunci lain.</div>';
+const R=A.filter(b=>b.rec);$('#recWrap').style.display=R.length?'':'none';$('#recs').innerHTML=R.map(card).join('');
+const P=A.filter(b=>(pop[b.id]||0)>0).sort((a,b)=>pop[b.id]-pop[a.id]).slice(0,4);$('#popWrap').style.display=P.length?'':'none';$('#pops').innerHTML=P.map(card).join('');
+let H=[];try{H=JSON.parse(localStorage.getItem('hist')||'[]')}catch(e){}H=H.map(i=>A.find(b=>b.id==i)).filter(Boolean).slice(0,4);$('#hisWrap').style.display=H.length?'':'none';$('#hist').innerHTML=H.map(card).join('');
+$('#ct').textContent=filt.cat?'Kategori: '+filt.cat:'Semua Koleksi';
+$('#sBooks').textContent=books.length;chart();
+$('#admin').classList.toggle('hid',!admin);$('#admBtn').textContent=admin?'Panel Admin':'Login Admin';
+}
+function chart(){const days=[6,5,4,3,2,1,0].map(o=>ymd(o)),v=days.map(d=>visits[d]||0),mx=Math.max(5,...v),w=640/7;
+$('#chart').innerHTML='<g stroke="currentColor" opacity=".12"><line x1="0" x2="640" y1="180" y2="180"/><line x1="0" x2="640" y1="90" y2="90"/></g>'+v.map((n,i)=>{const h=n/mx*150;return `<rect x="${i*w+14}" y="${180-h}" width="${w-28}" height="${h}" rx="6" fill="var(--pri)"/><text x="${i*w+w/2}" y="${172-h}" text-anchor="middle" font-size="13" font-weight="800" fill="currentColor">${n}</text><text x="${i*w+w/2}" y="202" text-anchor="middle" font-size="12" fill="var(--mut)">${days[i].slice(5)}</text>`}).join('');
+$('#sTot').textContent=Object.values(visits).reduce((a,b)=>a+b,0);$('#sToday').textContent=visits[ymd(0)]||0}
+
+// Reader
+let cur=null,pi=0;
+function openRd(b){track(b.id);cur=b;pi=0;$('#rT').textContent=b.title;$('#reader').classList.add('on');spread()}
+function pgHtml(p,n){return `<div class="pg">${p?(typeof p=='string'?`<img src="${src(p)}" alt="Halaman ${n}">`:`<p>${esc(p.t)}</p>`):''}${p?`<i>${n}</i>`:''}</div>`}
+function spread(dir){const P=cur.pages||[];const el=$('#spread');el.innerHTML=pgHtml(P[pi],pi+1)+pgHtml(P[pi+1],pi+2);
+el.className='spread '+(dir>0?'fn':dir<0?'fp':'');void el.offsetWidth;$('#rN').textContent=P.length?`Hal. ${pi+1}–${Math.min(pi+2,P.length)} / ${P.length}`:'Buku belum punya halaman'}
+$('#rNx').onclick=()=>{if(cur&&pi+2<(cur.pages||[]).length){pi+=2;spread(1)}};
+$('#rP').onclick=()=>{if(cur&&pi>0){pi-=2;spread(-1)}};
+$('#rX').onclick=()=>$('#reader').classList.remove('on');
+document.addEventListener('keydown',e=>{if(!$('#reader').classList.contains('on'))return;if(e.key=='ArrowRight')$('#rNx').click();if(e.key=='ArrowLeft')$('#rP').click();if(e.key=='Escape')$('#rX').click()});
+
+// Events
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-cat],[data-rd],[data-dl],[data-del]');if(!t)return;const D=t.dataset;
+if('cat'in D){filt.cat=D.cat;render()}
+else if(D.rd){openRd(all().find(b=>b.id==D.rd))}
+else if(D.dl){const b=all().find(x=>x.id==D.dl);if(!b.file){alert('Ini hanya contoh. Unggah PDF asli lewat Panel Admin.');return}
+track(b.id);try{const dls=await claude.use('downloads');const bl=await (await fetch(src(b.file))).blob();await dls.save({filename:b.title+'.pdf',data:bl})}catch(x){alert('Unduhan dibatalkan atau belum tersedia.')}}
+else if(D.del){if(!confirm('Hapus buku ini dari koleksi?'))return;const b=books.find(x=>x.id==D.del);try{await db.doc('books/'+b.id).delete();const a=await claude.use('assets');for(const id of [b.file,...(b.pages||[])]){if(typeof id=='string')a&&a.delete(id).catch(()=>{})}}catch(x){alert('Gagal menghapus.')}}});
+['#q','#type','#fmt'].forEach(s=>$(s).addEventListener('input',render));
+$('#admBtn').onclick=()=>admin?$('#admin').scrollIntoView():$('#login').classList.add('on');
+$('#aF').onchange=()=>{$('#aFl').textContent=$('#aF').value=='pdf'?'File PDF (satu file)':'Gambar halaman (pilih banyak, urut nama file)'};
+$('#aSave').onclick=async()=>{const m=$('#aMsg'),t=$('#aT').value.trim(),f=$('#aF').value,files=[...$('#aFile').files];
+if(!t||!files.length){m.textContent='Judul dan file wajib diisi.';return}
+try{m.textContent='Mengunggah…';const a=await claude.use('assets'),ids=[];files.sort((x,y)=>x.name.localeCompare(y.name,undefined,{numeric:true}));
+for(const [i,fl] of (f=='pdf'?[files[0]]:files).entries()){m.textContent=`Mengunggah ${i+1}/${files.length}…`;ids.push((await a.upload(fl)).id)}
+const id='b'+Date.now(),d={title:t,author:$('#aA').value,type:$('#aTy').value,cat:$('#aC').value.trim(),fmt:f,desc:$('#aD').value,rec:$('#aR').checked?1:0,ts:Date.now()};
+if(f=='pdf')d.file=ids[0];else d.pages=ids;
+await db.doc('books/'+id).set(d);m.textContent='✅ Buku tersimpan.';['aT','aA','aC','aD','aFile'].forEach(i=>$('#'+i).value='')}catch(x){m.textContent='Gagal menyimpan: '+(x.message||x.code)}};
+$('#bgSave').onclick=async()=>{const f=$('#bgFile').files[0],g=$('#bgmFile').files[0];if(!f&&!g)return;try{const a=await claude.use('assets'),c={...BG};if(f)c.bg=(await a.upload(f)).id;if(g)c.bgm=(await a.upload(g)).id;await db.doc('config/site').set(c);alert('Latar dipasang.')}catch(x){alert('Gagal: '+(x.message||x.code))}};
+let BG={};function setBg(c){BG=c||{};const id=(innerWidth<=700&&BG.bgm)||BG.bg;if(id)$('#hero').style.backgroundImage=`linear-gradient(#0a3f4dcc,#0a3f4d99),url(${src(id)})`}
+addEventListener('resize',()=>setBg(BG));
+async function track(id){try{let H=JSON.parse(localStorage.getItem('hist')||'[]');H=[id,...H.filter(x=>x!=id)].slice(0,12);localStorage.setItem('hist',JSON.stringify(H))}catch(e){}
+try{if(id[0]!='s'&&db){const r=db.doc('pop/'+id),s=await r.get();await r.set({n:(s.exists?s.data().n||0:0)+1})}}catch(e){}render()}
+$('#gS').onclick=async()=>{const n=$('#gN').value.trim(),m=$('#gM');if(!n){m.textContent='Nama wajib diisi.';return}if(!db){m.textContent='Buku tamu belum tersedia.';return}try{await db.doc('guests/g'+Date.now()).set({n,k:$('#gK').value,p:$('#gP').value,ts:Date.now()});m.textContent='Terima kasih sudah berkunjung! 🙏';['gN','gK','gP'].forEach(i=>$('#'+i).value='')}catch(e){m.textContent='Gagal mengirim.'}};
+function gl(){$('#gList').innerHTML=guests.length?guests.map(g=>`<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:14px"><b>${esc(g.n)}</b> · ${esc(g.k)} · ${new Date(g.ts).toLocaleDateString('id-ID')}<br>${esc(g.p)} <button class="btn red sm" onclick="db.doc('guests/${g.id}').delete()">Hapus</button></div>`).join(''):'<div class="msg">Belum ada tamu.</div>'}
+
+// Init
+$('#type').innerHTML+=TYPES.map(t=>`<option>${t}</option>`).join('');$('#aTy').innerHTML=TYPES.map(t=>`<option>${t}</option>`).join('');
+render();
+(async()=>{try{if(!window.claude)return;db=await claude.use('db');user=await claude.use('user');admin=!!(user&&user.canEdit());
+if(db){db.collection('books').onSnapshot(s=>{books=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.ts||0)-(a.ts||0));render()},()=>{});
+db.collection('visits').onSnapshot(s=>{visits={};s.docs.forEach(d=>visits[d.id]=d.data().count||0);chart()},()=>{});
+db.doc('config/site').onSnapshot(s=>{if(s.exists)setBg(s.data())},()=>{});
+db.collection('pop').onSnapshot(s=>{pop={};s.docs.forEach(d=>pop[d.id]=d.data().n||0);render()},()=>{});
+if(admin)db.collection('guests').onSnapshot(s=>{guests=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.ts-a.ts);gl()},()=>{});
+let seen=0;try{seen=sessionStorage.getItem('v')}catch(e){}
+if(!seen){const r=db.doc('visits/'+ymd(0)),s=await r.get();await r.set({count:(s.exists?s.data().count||0:0)+1});try{sessionStorage.setItem('v','1')}catch(e){}}}
+render()}catch(e){render()}})();
+</script>
+</body>
+</html>
