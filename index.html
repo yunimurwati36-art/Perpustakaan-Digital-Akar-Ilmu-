@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Perpustakaan Digital SMP Negeri 2 Tukul</title>
+<title>Perpustakaan Digital “Akar Ilmu” · SMP Negeri 2 Tukul</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f6f3ec;--card:#fff;--ink:#1d2b2a;--mut:#5d6b69;--pri:#0f6b66;--pri2:#0a4d49;--acc:#e8a33d;--line:#e3ddd0;--hero:linear-gradient(135deg,#0f6b66,#0a3f4d 60%,#1b2a4a);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -16,7 +16,9 @@ h1,h2,h3{font-family:Fraunces,Georgia,serif;margin:0}
 .wrap{max-width:1100px;margin:0 auto;padding:0 18px}
 nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
 nav .wrap{display:flex;align-items:center;gap:14px;height:58px}
-.logo{font-family:Fraunces,serif;font-weight:700;color:var(--pri);font-size:18px;flex:1}
+.logo{font-family:Fraunces,serif;font-weight:700;color:var(--pri);font-size:20px;line-height:1.1;flex:1;min-width:0}
+.logo small{display:block;font:600 11px Nunito,sans-serif;color:var(--mut);margin-top:2px}
+.eyebrow{display:inline-block;font:800 12px Nunito,sans-serif;letter-spacing:.12em;text-transform:uppercase;background:#ffffff26;border-radius:99px;padding:4px 12px;margin-bottom:12px}
 .btn{border:0;border-radius:10px;padding:9px 16px;font:inherit;font-weight:800;cursor:pointer;background:var(--pri);color:#fff}
 .btn.alt{background:transparent;color:var(--pri);border:1.5px solid var(--pri)}
 .btn.red{background:#b3372f}
@@ -64,9 +66,9 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 </style>
 </head>
 <body>
-<nav><div class="wrap"><div class="logo">📚 Perpustakaan SMPN 2 Tukul</div><a href="#koleksi" style="color:var(--ink);text-decoration:none;font-weight:700">Koleksi</a><a href="#statistik" style="color:var(--ink);text-decoration:none;font-weight:700">Statistik</a><button class="btn alt sm" id="admBtn">Login Admin</button></div></nav>
+<nav><div class="wrap"><div class="logo">📚 Akar Ilmu<small>Perpustakaan Digital · SMP Negeri 2 Tukul</small></div><a href="#koleksi" style="color:var(--ink);text-decoration:none;font-weight:700">Koleksi</a><a href="#statistik" style="color:var(--ink);text-decoration:none;font-weight:700">Statistik</a><button class="btn alt sm" id="admBtn">Login Admin</button></div></nav>
 
-<header class="hero" id="hero"><div class="wrap"><h1>Membaca itu jendela dunia, mulai dari layar kecilmu.</h1><p>Perpustakaan digital SMP Negeri 2 Tukul: baca buku langsung seperti halaman asli atau unduh PDF kapan saja.</p></div></header>
+<header class="hero" id="hero"><div class="wrap"><span class="eyebrow">SMP Negeri 2 Tukul</span><h1>Perpustakaan Digital “Akar Ilmu”</h1><p>Membaca itu jendela dunia, mulai dari layar kecilmu. Baca buku langsung seperti halaman asli atau unduh PDF kapan saja.</p></div></header>
 
 <div class="wrap search"><div class="sbox">
 <input id="q" placeholder="🔍 Cari judul atau penulis…">
@@ -110,7 +112,7 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 <div class="panel"><div class="stats"><div class="stat"><b id="sTot">0</b>Total kunjungan</div><div class="stat"><b id="sToday">0</b>Hari ini</div><div class="stat"><b id="sBooks">0</b>Judul buku</div></div>
 <div style="overflow-x:auto"><svg id="chart" viewBox="0 0 640 220" style="width:100%;min-width:420px"></svg></div></div></section>
 </main>
-<footer>© Perpustakaan Digital SMP Negeri 2 Tukul · “Buku adalah jendela dunia”</footer>
+<footer>© Perpustakaan Digital “Akar Ilmu” · SMP Negeri 2 Tukul</footer>
 
 <div class="ovl" id="login"><div class="panel" style="width:min(380px,100%);margin:0"><h3>Login Admin</h3><label>Email</label><input id="lgE" type="email"><label style="margin-top:8px">Kata sandi</label><input id="lgP" type="password"><p id="lgM" style="color:var(--mut);font-size:14px"></p><div style="display:flex;gap:8px"><button class="btn" id="lgGo">Masuk</button><button class="btn alt" id="lgX">Batal</button></div></div></div>
 <div class="ovl" id="reader"><div class="ctl"><b id="rT" style="font-family:Fraunces,serif"></b><button class="btn alt sm" style="color:#fff;border-color:#fff" id="rX">✕ Tutup</button></div>
