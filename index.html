@@ -62,6 +62,11 @@ label{font-size:13px;font-weight:800;color:var(--mut);display:block;margin-botto
 .hid{display:none}
 .msg{color:var(--mut);padding:20px;text-align:center}
 footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
+.rt{color:#111;background:#fff;font:13px/1.45 Georgia,serif;width:min(820px,100%);max-height:80vh;overflow:auto;padding:28px;border-radius:8px}
+.rt h2,.rt h3{font-family:Georgia,serif;color:#111;margin:12px 0 4px}.rt h2{text-align:center;font-size:18px;margin-top:0}
+.rt table{border-collapse:collapse;width:100%;margin:6px 0 14px}.rt td,.rt th{border:1px solid #999;padding:4px 7px;text-align:left;vertical-align:top}.rt th{background:#eee}
+.rt .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.rt .sig{display:grid;grid-template-columns:1fr 1fr;margin-top:30px;text-align:center}
+@media print{body>*:not(#rptO){display:none!important}#rptO{position:static!important;display:block!important;background:#fff!important;padding:0!important}#rptO .noprint{display:none!important}.rt{max-height:none!important;overflow:visible!important;width:100%!important;padding:0!important}}
 @media(max-width:700px){.sbox{grid-template-columns:1fr}.form{grid-template-columns:1fr}.pg+.pg{display:none}.stats{grid-template-columns:1fr 1fr 1fr}}
 </style>
 </head>
@@ -99,6 +104,8 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 <div class="full" id="aMsg" style="color:var(--mut);font-size:14px"></div>
 </div>
 <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+<label>Laporan untuk Kepala Perpustakaan</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="rpBtn">Lihat / Cetak Laporan</button><button class="btn alt" id="csvBtn">Ekspor Excel (CSV)</button></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
 <label>Kelola kategori</label><div style="display:flex;gap:8px"><input id="catN" placeholder="Nama kategori baru, mis. Sejarah"><button class="btn" id="catAdd">Tambah</button></div><div class="chips" id="catMgr"></div>
 <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
 <label>Latar beranda versi web/komputer</label><input type="file" id="bgFile" accept="image/*">
@@ -114,7 +121,9 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 </main>
 <footer>© Perpustakaan Digital “Akar Ilmu” · SMP Negeri 2 Tukul</footer>
 
+<div class="ovl" id="rptO"><div class="noprint" style="display:flex;gap:10px"><button class="btn" id="rptP">🖨 Cetak / Simpan PDF</button><button class="btn alt" id="rptX" style="background:#fff">Tutup</button></div><div class="rt" id="rptC"></div></div>
 <div class="ovl" id="login"><div class="panel" style="width:min(380px,100%);margin:0"><h3>Login Admin</h3><label>Email</label><input id="lgE" type="email"><label style="margin-top:8px">Kata sandi</label><input id="lgP" type="password"><p id="lgM" style="color:var(--mut);font-size:14px"></p><div style="display:flex;gap:8px"><button class="btn" id="lgGo">Masuk</button><button class="btn alt" id="lgX">Batal</button></div></div></div>
+<div class="ovl" id="edit"><div class="panel" style="width:min(520px,100%);margin:0;max-height:90vh;overflow:auto"><h3>Edit Buku</h3><div class="form" style="margin-top:10px"><div class="full"><label>Judul</label><input id="eT"></div><div><label>Penulis</label><input id="eA"></div><div><label>Jenis buku</label><select id="eTy"></select></div><div class="full"><label>Kategori</label><select id="eC"></select></div><div class="full"><label>Deskripsi</label><textarea id="eD" rows="2"></textarea></div><div class="full"><label><input type="checkbox" id="eR" style="width:auto"> Tampilkan di Referensi Pilihan</label></div></div><p id="eM" style="color:var(--mut);font-size:14px"></p><div style="display:flex;gap:8px"><button class="btn" id="eS">Simpan</button><button class="btn alt" id="eX">Batal</button></div></div></div>
 <div class="ovl" id="reader"><div class="ctl"><b id="rT" style="font-family:Fraunces,serif"></b><button class="btn alt sm" style="color:#fff;border-color:#fff" id="rX">✕ Tutup</button></div>
 <div class="spread" id="spread"></div>
 <div class="ctl"><button class="btn" id="rP">◀</button><span id="rN"></span><button class="btn" id="rNx">▶</button></div></div>
@@ -153,7 +162,7 @@ g('outBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
 })();
 </script>
 <script>
-const $=s=>document.querySelector(s),TYPES=['Novel','Kamus','Buku Ajar','Referensi','Ensiklopedia','Lainnya'],EM={Novel:'📖',Kamus:'🔤','Buku Ajar':'🎓',Referensi:'🗂️',Ensiklopedia:'🌍',Lainnya:'📘'};
+const $=s=>document.querySelector(s),TYPES=['Novel','Kamus','Buku Teks','Buku Ajar','Referensi','Ensiklopedia','Lainnya'],EM={Novel:'📖',Kamus:'🔤','Buku Teks':'📗','Buku Ajar':'🎓',Referensi:'🗂️',Ensiklopedia:'🌍',Lainnya:'📘'};
 const lorem=n=>({t:'Halaman '+n+'. Membaca membuka wawasan dan melatih imajinasi. Luangkan waktu setiap hari untuk membaca walau hanya sepuluh menit, dan rasakan perubahannya.'});
 const SAMPLE=[
 {id:'s1',title:'Laskar Pelangi (contoh)',author:'Penulis Contoh',type:'Novel',cat:'Fiksi',fmt:'flip',hue:200,rec:1,desc:'Contoh buku flipbook.',pages:[1,2,3,4,5,6].map(lorem)},
@@ -167,7 +176,7 @@ const all=()=>books.length?books:SAMPLE;
 
 function card(b){const h=b.hue??(b.title.length*37)%360,im=b.cover||(typeof (b.pages||[])[0]=='string'?b.pages[0]:'');
 return `<div class="book"><div class="cover" style="background:${im?`url(${src(im)}) center/cover #ddd`:`linear-gradient(160deg,hsl(${h} 60% 38%),hsl(${(h+40)%360} 55% 22%))`}"><span class="badge">${b.fmt=='pdf'?'PDF':'FLIPBOOK'}</span>${im?'':`<small>${esc(b.type)}</small><span class="em">${EM[b.type]||'📘'}</span><span style="font-size:15px;line-height:1.2">${esc(b.title)}</span>`}</div>
-<div class="binfo"><b>${esc(b.title)}</b><span>${esc(b.author||'')} · ${esc(b.cat||'')}</span><div class="acts"><button class="btn sm" data-rd="${b.id}">📖 Baca</button>${b.fmt=='pdf'?`<button class="btn alt sm" data-dl="${b.id}">⬇ Unduh</button>`:''}${admin&&b.id[0]!='s'?`<button class="btn alt sm" data-cv="${b.id}">Sampul</button>${b.fmt=='pdf'&&!b.cover?`<button class="btn alt sm" data-ac="${b.id}">Sampul otomatis</button>`:''}<button class="btn red sm" data-del="${b.id}">Hapus</button>`:''}</div></div></div>`}
+<div class="binfo"><b>${esc(b.title)}</b><span>${esc(b.author||'')} · ${esc(b.cat||'')}</span><div class="acts"><button class="btn sm" data-rd="${b.id}">📖 Baca</button>${b.fmt=='pdf'?`<button class="btn alt sm" data-dl="${b.id}">⬇ Unduh</button>`:''}${admin&&b.id[0]!='s'?`<button class="btn sm" data-ed="${b.id}">✏️ Edit</button><button class="btn alt sm" data-cv="${b.id}">Sampul</button>${b.fmt=='pdf'&&!b.cover?`<button class="btn alt sm" data-ac="${b.id}">Sampul otomatis</button>`:''}<button class="btn red sm" data-del="${b.id}">Hapus</button>`:''}</div></div></div>`}
 
 function render(){
 const q=$('#q').value.toLowerCase(),ty=$('#type').value,fm=$('#fmt').value,A=all();
@@ -237,6 +246,32 @@ $('#catAdd').onclick=async()=>{const n=$('#catN').value.trim();if(!n||CATS.inclu
 document.addEventListener('click',async e=>{const t=e.target.closest('[data-cd]');if(!t)return;e.preventDefault();const l=CATS.filter(c=>c!=t.dataset.cd);try{await db.doc('config/cats').set({list:l});CATS=l;render()}catch(x){alert('Gagal: '+(x.message||x.code))}});
 document.addEventListener('click',e=>{const t=e.target.closest('[data-cv]');if(!t)return;const b=books.find(x=>x.id==t.dataset.cv),i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{try{const a=await claude.use('assets'),r=await a.upload(i.files[0]),{id,...d}=b;await db.doc('books/'+id).set({...d,cover:r.id})}catch(x){alert('Gagal: '+(x.message||x.code))}};i.click()});
 document.addEventListener('click',async e=>{const t=e.target.closest('[data-ac]');if(!t)return;const b=books.find(x=>x.id==t.dataset.ac);t.textContent='Memproses…';try{const a=await claude.use('assets'),bl=await pdfCover(src(b.file)),r=await a.upload(new File([bl],'cover.jpg',{type:'image/jpeg'})),{id,...d}=b;await db.doc('books/'+id).set({...d,cover:r.id})}catch(x){alert('Gagal: '+(x.message||x.code));t.textContent='Sampul otomatis'}});
+let EID=null;
+document.addEventListener('click',e=>{const t=e.target.closest('[data-ed]');if(!t)return;const b=books.find(x=>x.id==t.dataset.ed);if(!b)return;EID=b.id;
+const cs=[...new Set([...books.map(x=>x.cat),...CATS].filter(Boolean))].sort();
+$('#eT').value=b.title||'';$('#eA').value=b.author||'';$('#eD').value=b.desc||'';$('#eR').checked=!!b.rec;
+$('#eTy').innerHTML=[...new Set([...TYPES,b.type].filter(Boolean))].map(x=>`<option>${esc(x)}</option>`).join('');$('#eTy').value=b.type;
+$('#eC').innerHTML=cs.map(x=>`<option>${esc(x)}</option>`).join('');$('#eC').value=b.cat||'';$('#eM').textContent='';$('#edit').classList.add('on')});
+$('#eX').onclick=()=>$('#edit').classList.remove('on');
+$('#eS').onclick=async()=>{const b=books.find(x=>x.id==EID),t=$('#eT').value.trim();if(!b||!t){$('#eM').textContent='Judul wajib diisi.';return}
+try{const {id,...d}=b;await db.doc('books/'+id).set({...d,title:t,author:$('#eA').value.trim(),type:$('#eTy').value,cat:$('#eC').value,desc:$('#eD').value,rec:$('#eR').checked?1:0});$('#edit').classList.remove('on')}catch(x){$('#eM').textContent='Gagal: '+(x.message||x.code)}};
+const sorted=()=>books.slice().sort((a,b)=>a.title.localeCompare(b.title,'id'));
+const csvq=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+$('#csvBtn').onclick=()=>{if(!books.length){alert('Belum ada buku di koleksi.');return}
+const rows=[['No','Judul','Penulis','Jenis','Kategori','Format','Dibaca/Diunduh','Ditambahkan']];
+sorted().forEach((b,i)=>rows.push([i+1,b.title,b.author||'',b.type||'',b.cat||'',b.fmt=='pdf'?'PDF':'Flipbook',pop[b.id]||0,b.ts?new Date(b.ts).toLocaleDateString('id-ID'):'']));
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(csvq).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'}));a.download='koleksi-perpustakaan-'+ymd(0)+'.csv';document.body.appendChild(a);a.click();a.remove()};
+const cnt=k=>{const m={};books.forEach(b=>{const v=k(b)||'(tanpa kategori)';m[v]=(m[v]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${esc(k)}</td><td style="text-align:right;width:70px">${v}</td></tr>`).join('')};
+$('#rpBtn').onclick=()=>{if(!books.length){alert('Belum ada buku di koleksi.');return}
+const tgl=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),vis=Object.values(visits).reduce((a,b)=>a+b,0),rd=Object.values(pop).reduce((a,b)=>a+b,0),top=books.filter(b=>pop[b.id]).sort((a,b)=>pop[b.id]-pop[a.id]).slice(0,5),nP=books.filter(b=>b.fmt=='pdf').length;
+$('#rptC').innerHTML=`<h2>LAPORAN KOLEKSI PERPUSTAKAAN DIGITAL “AKAR ILMU”<br>SMP NEGERI 2 TUKUL</h2><p style="text-align:center;margin:0 0 10px">Per tanggal ${tgl}</p>
+<h3>A. Ringkasan</h3><table><tr><td>Total judul buku</td><td style="text-align:right"><b>${books.length}</b></td></tr><tr><td>Buku format flipbook</td><td style="text-align:right">${books.length-nP}</td></tr><tr><td>Buku format PDF</td><td style="text-align:right">${nP}</td></tr><tr><td>Total kunjungan perpustakaan</td><td style="text-align:right">${vis}</td></tr><tr><td>Total buku dibaca/diunduh</td><td style="text-align:right">${rd}</td></tr></table>
+<div class="two"><div><h3>B. Per Jenis Buku</h3><table>${cnt(b=>b.type)}</table></div><div><h3>C. Per Kategori</h3><table>${cnt(b=>b.cat)}</table></div></div>
+${top.length?`<h3>D. Buku Paling Banyak Dibaca/Diunduh</h3><table>${top.map((b,i)=>`<tr><td style="width:30px">${i+1}</td><td>${esc(b.title)}</td><td style="text-align:right;width:70px">${pop[b.id]}</td></tr>`).join('')}</table>`:''}
+<h3>${top.length?'E':'D'}. Daftar Judul Koleksi</h3><table><tr><th>No</th><th>Judul</th><th>Penulis</th><th>Jenis</th><th>Kategori</th><th>Format</th></tr>${sorted().map((b,i)=>`<tr><td>${i+1}</td><td>${esc(b.title)}</td><td>${esc(b.author||'')}</td><td>${esc(b.type||'')}</td><td>${esc(b.cat||'')}</td><td>${b.fmt=='pdf'?'PDF':'Flipbook'}</td></tr>`).join('')}</table>
+<div class="sig"><div>Mengetahui,<br>Kepala Perpustakaan<br><br><br><br>(................................)</div><div>Petugas Perpustakaan<br><br><br><br><br>(................................)</div></div>`;
+$('#rptO').classList.add('on')};
+$('#rptP').onclick=()=>print();$('#rptX').onclick=()=>$('#rptO').classList.remove('on');
 // Init
 $('#type').innerHTML+=TYPES.map(t=>`<option>${t}</option>`).join('');$('#aTy').innerHTML=TYPES.map(t=>`<option>${t}</option>`).join('');
 render();
