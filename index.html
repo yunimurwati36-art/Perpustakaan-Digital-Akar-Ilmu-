@@ -27,7 +27,7 @@ nav .wrap{display:flex;align-items:center;gap:14px;height:58px}
 .hero p{max-width:560px;opacity:.92}
 .hero h1{font-size:clamp(28px,5vw,46px);line-height:1.15;margin-bottom:10px}
 .search{margin-top:-34px;position:relative}
-.sbox{background:var(--card);border-radius:16px;box-shadow:0 10px 30px #0002;padding:14px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.sbox{background:var(--card);border-radius:16px;box-shadow:0 10px 30px #0002;padding:14px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px}
 input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
 .chip{padding:6px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;color:var(--ink)}
@@ -78,6 +78,7 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 <div class="wrap search"><div class="sbox">
 <input id="q" placeholder="🔍 Cari judul atau penulis…">
 <select id="type"><option value="">Semua jenis buku</option></select>
+<select id="grp"><option value="">Fiksi &amp; Nonfiksi</option><option>Fiksi</option><option>Nonfiksi</option></select>
 <select id="fmt"><option value="">Semua format</option><option value="flip">Baca Online (flipbook)</option><option value="pdf">PDF (unduh)</option></select>
 </div></div>
 
@@ -94,6 +95,7 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 <div class="full"><label>Judul buku</label><input id="aT"></div>
 <div><label>Penulis</label><input id="aA"></div>
 <div><label>Jenis buku</label><select id="aTy"></select></div>
+<div><label>Kelompok</label><select id="aG"><option>Nonfiksi</option><option>Fiksi</option></select></div>
 <div><label>Kategori (tambah kategori baru di bagian bawah)</label><select id="aC"></select></div>
 <div><label>Format</label><select id="aF"><option value="flip">Baca Online (flipbook, unggah gambar halaman)</option><option value="pdf">PDF (bisa diunduh)</option></select></div>
 <div class="full"><label>Deskripsi singkat</label><textarea id="aD" rows="2"></textarea></div>
@@ -123,7 +125,7 @@ footer{text-align:center;color:var(--mut);padding:30px 18px 40px;font-size:14px}
 
 <div class="ovl" id="rptO"><div class="noprint" style="display:flex;gap:10px"><button class="btn" id="rptP">🖨 Cetak / Simpan PDF</button><button class="btn alt" id="rptX" style="background:#fff">Tutup</button></div><div class="rt" id="rptC"></div></div>
 <div class="ovl" id="login"><div class="panel" style="width:min(380px,100%);margin:0"><h3>Login Admin</h3><label>Email</label><input id="lgE" type="email"><label style="margin-top:8px">Kata sandi</label><input id="lgP" type="password"><p id="lgM" style="color:var(--mut);font-size:14px"></p><div style="display:flex;gap:8px"><button class="btn" id="lgGo">Masuk</button><button class="btn alt" id="lgX">Batal</button></div></div></div>
-<div class="ovl" id="edit"><div class="panel" style="width:min(520px,100%);margin:0;max-height:90vh;overflow:auto"><h3>Edit Buku</h3><div class="form" style="margin-top:10px"><div class="full"><label>Judul</label><input id="eT"></div><div><label>Penulis</label><input id="eA"></div><div><label>Jenis buku</label><select id="eTy"></select></div><div class="full"><label>Kategori</label><select id="eC"></select></div><div class="full"><label>Deskripsi</label><textarea id="eD" rows="2"></textarea></div><div class="full"><label><input type="checkbox" id="eR" style="width:auto"> Tampilkan di Referensi Pilihan</label></div></div><p id="eM" style="color:var(--mut);font-size:14px"></p><div style="display:flex;gap:8px"><button class="btn" id="eS">Simpan</button><button class="btn alt" id="eX">Batal</button></div></div></div>
+<div class="ovl" id="edit"><div class="panel" style="width:min(520px,100%);margin:0;max-height:90vh;overflow:auto"><h3>Edit Buku</h3><div class="form" style="margin-top:10px"><div class="full"><label>Judul</label><input id="eT"></div><div><label>Penulis</label><input id="eA"></div><div><label>Jenis buku</label><select id="eTy"></select></div><div class="full"><label>Kelompok</label><select id="eG"><option>Nonfiksi</option><option>Fiksi</option></select></div><div class="full"><label>Kategori</label><select id="eC"></select></div><div class="full"><label>Deskripsi</label><textarea id="eD" rows="2"></textarea></div><div class="full"><label><input type="checkbox" id="eR" style="width:auto"> Tampilkan di Referensi Pilihan</label></div></div><p id="eM" style="color:var(--mut);font-size:14px"></p><div style="display:flex;gap:8px"><button class="btn" id="eS">Simpan</button><button class="btn alt" id="eX">Batal</button></div></div></div>
 <div class="ovl" id="reader"><div class="ctl"><b id="rT" style="font-family:Fraunces,serif"></b><button class="btn alt sm" style="color:#fff;border-color:#fff" id="rX">✕ Tutup</button></div>
 <div class="spread" id="spread"></div>
 <div class="ctl"><button class="btn" id="rP">◀</button><span id="rN"></span><button class="btn" id="rNx">▶</button></div></div>
@@ -174,17 +176,18 @@ const ymd=o=>{const d=new Date(Date.now()-o*864e5);return d.toISOString().slice(
 const src=id=>window.CFG.url+'/storage/v1/object/public/buku/'+id,esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const all=()=>books.length?books:SAMPLE;
 
+const GRP=b=>b.grp||(b.type=='Novel'?'Fiksi':'Nonfiksi');
 function card(b){const h=b.hue??(b.title.length*37)%360,im=b.cover||(typeof (b.pages||[])[0]=='string'?b.pages[0]:'');
 return `<div class="book"><div class="cover" style="background:${im?`url(${src(im)}) center/cover #ddd`:`linear-gradient(160deg,hsl(${h} 60% 38%),hsl(${(h+40)%360} 55% 22%))`}"><span class="badge">${b.fmt=='pdf'?'PDF':'FLIPBOOK'}</span>${im?'':`<small>${esc(b.type)}</small><span class="em">${EM[b.type]||'📘'}</span><span style="font-size:15px;line-height:1.2">${esc(b.title)}</span>`}</div>
 <div class="binfo"><b>${esc(b.title)}</b><span>${esc(b.author||'')} · ${esc(b.cat||'')}</span><div class="acts"><button class="btn sm" data-rd="${b.id}">📖 Baca</button>${b.fmt=='pdf'?`<button class="btn alt sm" data-dl="${b.id}">⬇ Unduh</button>`:''}${admin&&b.id[0]!='s'?`<button class="btn sm" data-ed="${b.id}">✏️ Edit</button><button class="btn alt sm" data-cv="${b.id}">Sampul</button>${b.fmt=='pdf'&&!b.cover?`<button class="btn alt sm" data-ac="${b.id}">Sampul otomatis</button>`:''}<button class="btn red sm" data-del="${b.id}">Hapus</button>`:''}</div></div></div>`}
 
 function render(){
-const q=$('#q').value.toLowerCase(),ty=$('#type').value,fm=$('#fmt').value,A=all();
+const q=$('#q').value.toLowerCase(),ty=$('#type').value,fm=$('#fmt').value,gp=$('#grp').value,A=all();
 const cats=[...new Set([...A.map(b=>b.cat),...CATS].filter(Boolean))].sort();
 $('#cats').innerHTML=['',...cats].map(c=>`<button class="chip ${filt.cat==c?'on':''}" data-cat="${esc(c)}">${c||'Semua kategori'}</button>`).join('');
 const sv=$('#aC').value;$('#aC').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('')||'<option value="">(buat kategori dulu)</option>';if(cats.includes(sv))$('#aC').value=sv;
 $('#catMgr').innerHTML=CATS.map(c=>`<span class="chip">${esc(c)} <a href="#" data-cd="${esc(c)}" style="color:#b3372f;text-decoration:none">✕</a></span>`).join('');
-const L=A.filter(b=>(!q||(b.title+' '+(b.author||'')).toLowerCase().includes(q))&&(!ty||b.type==ty)&&(!fm||b.fmt==fm)&&(!filt.cat||b.cat==filt.cat));
+const L=A.filter(b=>(!q||(b.title+' '+(b.author||'')).toLowerCase().includes(q))&&(!ty||b.type==ty)&&(!fm||b.fmt==fm)&&(!gp||GRP(b)==gp)&&(!filt.cat||b.cat==filt.cat));
 $('#list').innerHTML=L.length?L.map(card).join(''):'<div class="msg" style="grid-column:1/-1">Buku tidak ditemukan. Coba kata kunci lain.</div>';
 const R=A.filter(b=>b.rec);$('#recWrap').style.display=R.length?'':'none';$('#recs').innerHTML=R.map(card).join('');
 const P=A.filter(b=>(pop[b.id]||0)>0).sort((a,b)=>pop[b.id]-pop[a.id]).slice(0,4);$('#popWrap').style.display=P.length?'':'none';$('#pops').innerHTML=P.map(card).join('');
@@ -224,14 +227,14 @@ else if(D.rd){openRd(all().find(b=>b.id==D.rd))}
 else if(D.dl){const b=all().find(x=>x.id==D.dl);if(!b.file){alert('Ini hanya contoh. Unggah PDF asli lewat Panel Admin.');return}
 track(b.id);try{const dls=await claude.use('downloads');const bl=await (await fetch(src(b.file))).blob();await dls.save({filename:b.title+'.pdf',data:bl})}catch(x){alert('Unduhan dibatalkan atau belum tersedia.')}}
 else if(D.del){if(!confirm('Hapus buku ini dari koleksi?'))return;const b=books.find(x=>x.id==D.del);try{await db.doc('books/'+b.id).delete();const a=await claude.use('assets');for(const id of [b.file,b.cover,...(b.pages||[])]){if(typeof id=='string')a&&a.delete(id).catch(()=>{})}}catch(x){alert('Gagal menghapus.')}}});
-['#q','#type','#fmt'].forEach(s=>$(s).addEventListener('input',render));
+['#q','#type','#fmt','#grp'].forEach(s=>$(s).addEventListener('input',render));
 $('#admBtn').onclick=()=>admin?$('#admin').scrollIntoView():$('#login').classList.add('on');
 $('#aF').onchange=()=>{$('#aFl').textContent=$('#aF').value=='pdf'?'File PDF (satu file)':'Gambar halaman (pilih banyak, urut nama file)'};
 $('#aSave').onclick=async()=>{const m=$('#aMsg'),t=$('#aT').value.trim(),f=$('#aF').value,files=[...$('#aFile').files];
 if(!t||!files.length){m.textContent='Judul dan file wajib diisi.';return}
 try{m.textContent='Mengunggah…';const a=await claude.use('assets'),ids=[];files.sort((x,y)=>x.name.localeCompare(y.name,undefined,{numeric:true}));
 for(const [i,fl] of (f=='pdf'?[files[0]]:files).entries()){m.textContent=`Mengunggah ${i+1}/${files.length}…`;ids.push((await a.upload(fl)).id)}
-const id='b'+Date.now(),d={title:t,author:$('#aA').value,type:$('#aTy').value,cat:$('#aC').value.trim(),fmt:f,desc:$('#aD').value,rec:$('#aR').checked?1:0,ts:Date.now()};
+const id='b'+Date.now(),d={title:t,author:$('#aA').value,type:$('#aTy').value,cat:$('#aC').value.trim(),fmt:f,desc:$('#aD').value,rec:$('#aR').checked?1:0,grp:$('#aG').value,ts:Date.now()};
 const cv=$('#aCov').files[0];if(cv)d.cover=(await a.upload(cv)).id;else if(f=='pdf'&&window.pdfjsLib){try{m.textContent='Membuat sampul…';d.cover=(await a.upload(new File([await pdfCover(URL.createObjectURL(files[0]))],'cover.jpg',{type:'image/jpeg'}))).id}catch(e){}}if(f=='pdf')d.file=ids[0];else d.pages=ids;
 await db.doc('books/'+id).set(d);m.textContent='✅ Buku tersimpan.';['aT','aA','aD','aFile','aCov'].forEach(i=>$('#'+i).value='')}catch(x){m.textContent='Gagal menyimpan: '+(x.message||x.code)}};
 $('#bgSave').onclick=async()=>{const f=$('#bgFile').files[0],g=$('#bgmFile').files[0];if(!f&&!g)return;try{const a=await claude.use('assets'),c={...BG};if(f)c.bg=(await a.upload(f)).id;if(g)c.bgm=(await a.upload(g)).id;await db.doc('config/site').set(c);setBg(c);alert('Latar dipasang.')}catch(x){alert('Gagal: '+(x.message||x.code))}};
@@ -251,27 +254,29 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-ed]');if(!
 const cs=[...new Set([...books.map(x=>x.cat),...CATS].filter(Boolean))].sort();
 $('#eT').value=b.title||'';$('#eA').value=b.author||'';$('#eD').value=b.desc||'';$('#eR').checked=!!b.rec;
 $('#eTy').innerHTML=[...new Set([...TYPES,b.type].filter(Boolean))].map(x=>`<option>${esc(x)}</option>`).join('');$('#eTy').value=b.type;
-$('#eC').innerHTML=cs.map(x=>`<option>${esc(x)}</option>`).join('');$('#eC').value=b.cat||'';$('#eM').textContent='';$('#edit').classList.add('on')});
+$('#eC').innerHTML=cs.map(x=>`<option>${esc(x)}</option>`).join('');$('#eC').value=b.cat||'';$('#eG').value=GRP(b);$('#eM').textContent='';$('#edit').classList.add('on')});
 $('#eX').onclick=()=>$('#edit').classList.remove('on');
 $('#eS').onclick=async()=>{const b=books.find(x=>x.id==EID),t=$('#eT').value.trim();if(!b||!t){$('#eM').textContent='Judul wajib diisi.';return}
-try{const {id,...d}=b;await db.doc('books/'+id).set({...d,title:t,author:$('#eA').value.trim(),type:$('#eTy').value,cat:$('#eC').value,desc:$('#eD').value,rec:$('#eR').checked?1:0});$('#edit').classList.remove('on')}catch(x){$('#eM').textContent='Gagal: '+(x.message||x.code)}};
+try{const {id,...d}=b;await db.doc('books/'+id).set({...d,title:t,author:$('#eA').value.trim(),type:$('#eTy').value,cat:$('#eC').value,desc:$('#eD').value,rec:$('#eR').checked?1:0,grp:$('#eG').value});$('#edit').classList.remove('on')}catch(x){$('#eM').textContent='Gagal: '+(x.message||x.code)}};
 const sorted=()=>books.slice().sort((a,b)=>a.title.localeCompare(b.title,'id'));
 const csvq=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
 $('#csvBtn').onclick=()=>{if(!books.length){alert('Belum ada buku di koleksi.');return}
-const rows=[['No','Judul','Penulis','Jenis','Kategori','Format','Dibaca/Diunduh','Ditambahkan']];
-sorted().forEach((b,i)=>rows.push([i+1,b.title,b.author||'',b.type||'',b.cat||'',b.fmt=='pdf'?'PDF':'Flipbook',pop[b.id]||0,b.ts?new Date(b.ts).toLocaleDateString('id-ID'):'']));
+const rows=[['No','Judul','Penulis','Jenis','Kelompok','Kategori','Format','Dibaca/Diunduh','Ditambahkan']];
+sorted().forEach((b,i)=>rows.push([i+1,b.title,b.author||'',b.type||'',GRP(b),b.cat||'',b.fmt=='pdf'?'PDF':'Flipbook',pop[b.id]||0,b.ts?new Date(b.ts).toLocaleDateString('id-ID'):'']));
 const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(csvq).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'}));a.download='koleksi-perpustakaan-'+ymd(0)+'.csv';document.body.appendChild(a);a.click();a.remove()};
+const grpTable=()=>['Fiksi','Nonfiksi'].map(g=>{const L=books.filter(b=>GRP(b)==g),m={};L.forEach(b=>{const c=b.cat||'(tanpa kategori)';m[c]=(m[c]||0)+1});return `<tr><th colspan="2">${g}</th><th style="text-align:right;width:70px">${L.length}</th></tr>`+Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`<tr><td style="width:24px"></td><td>${esc(c)}</td><td style="text-align:right">${n}</td></tr>`).join('')}).join('');
 const cnt=k=>{const m={};books.forEach(b=>{const v=k(b)||'(tanpa kategori)';m[v]=(m[v]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${esc(k)}</td><td style="text-align:right;width:70px">${v}</td></tr>`).join('')};
 $('#rpBtn').onclick=()=>{if(!books.length){alert('Belum ada buku di koleksi.');return}
-const tgl=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),vis=Object.values(visits).reduce((a,b)=>a+b,0),rd=Object.values(pop).reduce((a,b)=>a+b,0),top=books.filter(b=>pop[b.id]).sort((a,b)=>pop[b.id]-pop[a.id]).slice(0,5),nP=books.filter(b=>b.fmt=='pdf').length;
+const tgl=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),vis=Object.values(visits).reduce((a,b)=>a+b,0),rd=Object.values(pop).reduce((a,b)=>a+b,0),top=books.filter(b=>pop[b.id]).sort((a,b)=>pop[b.id]-pop[a.id]).slice(0,5),nP=books.filter(b=>b.fmt=='pdf').length,nF=books.filter(b=>GRP(b)=='Fiksi').length;
 $('#rptC').innerHTML=`<h2>LAPORAN KOLEKSI PERPUSTAKAAN DIGITAL “AKAR ILMU”<br>SMP NEGERI 2 TUKUL</h2><p style="text-align:center;margin:0 0 10px">Per tanggal ${tgl}</p>
-<h3>A. Ringkasan</h3><table><tr><td>Total judul buku</td><td style="text-align:right"><b>${books.length}</b></td></tr><tr><td>Buku format flipbook</td><td style="text-align:right">${books.length-nP}</td></tr><tr><td>Buku format PDF</td><td style="text-align:right">${nP}</td></tr><tr><td>Total kunjungan perpustakaan</td><td style="text-align:right">${vis}</td></tr><tr><td>Total buku dibaca/diunduh</td><td style="text-align:right">${rd}</td></tr></table>
-<div class="two"><div><h3>B. Per Jenis Buku</h3><table>${cnt(b=>b.type)}</table></div><div><h3>C. Per Kategori</h3><table>${cnt(b=>b.cat)}</table></div></div>
+<h3>A. Ringkasan</h3><table><tr><td>Total judul buku</td><td style="text-align:right"><b>${books.length}</b></td></tr><tr><td>Buku Fiksi</td><td style="text-align:right">${nF}</td></tr><tr><td>Buku Nonfiksi</td><td style="text-align:right">${books.length-nF}</td></tr><tr><td>Buku format flipbook</td><td style="text-align:right">${books.length-nP}</td></tr><tr><td>Buku format PDF</td><td style="text-align:right">${nP}</td></tr><tr><td>Total kunjungan perpustakaan</td><td style="text-align:right">${vis}</td></tr><tr><td>Total buku dibaca/diunduh</td><td style="text-align:right">${rd}</td></tr></table>
+<h3>B. Fiksi dan Nonfiksi menurut Kategori</h3><table>${grpTable()}</table><h3>C. Per Jenis Buku</h3><table>${cnt(b=>b.type)}</table>
 ${top.length?`<h3>D. Buku Paling Banyak Dibaca/Diunduh</h3><table>${top.map((b,i)=>`<tr><td style="width:30px">${i+1}</td><td>${esc(b.title)}</td><td style="text-align:right;width:70px">${pop[b.id]}</td></tr>`).join('')}</table>`:''}
-<h3>${top.length?'E':'D'}. Daftar Judul Koleksi</h3><table><tr><th>No</th><th>Judul</th><th>Penulis</th><th>Jenis</th><th>Kategori</th><th>Format</th></tr>${sorted().map((b,i)=>`<tr><td>${i+1}</td><td>${esc(b.title)}</td><td>${esc(b.author||'')}</td><td>${esc(b.type||'')}</td><td>${esc(b.cat||'')}</td><td>${b.fmt=='pdf'?'PDF':'Flipbook'}</td></tr>`).join('')}</table>
+<h3>${top.length?'E':'D'}. Daftar Judul Koleksi</h3><table><tr><th>No</th><th>Judul</th><th>Penulis</th><th>Jenis</th><th>Kelompok</th><th>Kategori</th><th>Format</th></tr>${sorted().map((b,i)=>`<tr><td>${i+1}</td><td>${esc(b.title)}</td><td>${esc(b.author||'')}</td><td>${esc(b.type||'')}</td><td>${GRP(b)}</td><td>${esc(b.cat||'')}</td><td>${b.fmt=='pdf'?'PDF':'Flipbook'}</td></tr>`).join('')}</table>
 <div class="sig"><div>Mengetahui,<br>Kepala Perpustakaan<br><br><br><br>(................................)</div><div>Petugas Perpustakaan<br><br><br><br><br>(................................)</div></div>`;
 $('#rptO').classList.add('on')};
 $('#rptP').onclick=()=>print();$('#rptX').onclick=()=>$('#rptO').classList.remove('on');
+$('#aTy').addEventListener('change',()=>{$('#aG').value=$('#aTy').value=='Novel'?'Fiksi':'Nonfiksi'});
 // Init
 $('#type').innerHTML+=TYPES.map(t=>`<option>${t}</option>`).join('');$('#aTy').innerHTML=TYPES.map(t=>`<option>${t}</option>`).join('');
 render();
